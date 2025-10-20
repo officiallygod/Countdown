@@ -1,8 +1,8 @@
-// Countdown to Jan 6, 2026 excluding Sundays and custom holidays
+// Countdown to Jan 5, 2026 excluding Sundays and custom holidays
 // Works in IST (Asia/Kolkata)
 
 (function () {
-	let TARGET = { y: 2026, m: 0, d: 6 }; // Overridden by config when available
+	let TARGET = { y: 2026, m: 0, d: 5 }; // Overridden by config when available
 	const IST_OFFSET_MIN = 5 * 60 + 30; // +330
 
 	const $days = document.getElementById('daysCount');
