@@ -1,41 +1,40 @@
 {
-  "base": {
-    "--bg-1": "#f7f5ff",
-    "--bg-2": "#e6f7ff",
-    "--ink": "#243342",
-    "--muted": "#64748b",
-    "--accent-1": "#96d1c7",
-    "--accent-2": "#ffd6e8"
-  },
-  "sunday": {
-    "--bg-1": "#fff1f2",
-    "--bg-2": "#ffe4e6",
-    "--accent-1": "#ffb3c1",
-    "--accent-2": "#ffd6d9"
-  },
-  "diwali": {
-    "--bg-1": "#fff8e1",
-    "--bg-2": "#ffe6f0",
-    "--accent-1": "#ffd27f",
-    "--accent-2": "#f9a8d4"
-  },
-  "karnataka": {
-    "--bg-1": "#fff7cc",
-    "--bg-2": "#ffe0e0",
-    "--accent-1": "#ffd54f",
-    "--accent-2": "#ff9aa2"
-  },
-  "christmas": {
-    "--bg-1": "#ffe7e7",
-    "--bg-2": "#e8f7ef",
-    "--accent-1": "#ffb4b4",
-    "--accent-2": "#a7e8c9"
-  },
-  "newyear": {
-    "--bg-1": "#f0f4ff",
-    "--bg-2": "#e9ddff",
-    "--accent-1": "#a3bffa",
-    "--accent-2": "#d6bcfa"
-  }
+	"base": {
+		"--bg-1": "#f7f5ff",
+		"--bg-2": "#e6f7ff",
+		"--ink": "#243342",
+		"--muted": "#64748b",
+		"--accent-1": "#96d1c7",
+		"--accent-2": "#ffd6e8"
+	},
+	"sunday": {
+		"--bg-1": "#fff1f2",
+		"--bg-2": "#ffe4e6",
+		"--accent-1": "#ffb3c1",
+		"--accent-2": "#ffd6d9"
+	},
+	"diwali": {
+		"--bg-1": "#fff8e1",
+		"--bg-2": "#ffe6f0",
+		"--accent-1": "#ffd27f",
+		"--accent-2": "#f9a8d4"
+	},
+	"karnataka": {
+		"--bg-1": "#fff7cc",
+		"--bg-2": "#ffe0e0",
+		"--accent-1": "#ffd54f",
+		"--accent-2": "#ff9aa2"
+	},
+	"christmas": {
+		"--bg-1": "#ffe7e7",
+		"--bg-2": "#e8f7ef",
+		"--accent-1": "#ffb4b4",
+		"--accent-2": "#a7e8c9"
+	},
+	"newyear": {
+		"--bg-1": "#f0f4ff",
+		"--bg-2": "#e9ddff",
+		"--accent-1": "#a3bffa",
+		"--accent-2": "#d6bcfa"
+	}
 }
-
