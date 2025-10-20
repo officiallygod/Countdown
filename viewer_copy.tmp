@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Countdown Viewer</title>
+    <link rel="stylesheet" href="viewer.css" />
+  </head>
+  <body>
+    <div id="themeBadge" class="badge" aria-hidden="true"></div>
+    <main class="stage">
+      <div class="center">
+        <div class="status" id="status" aria-live="polite"></div>
+        <div class="days" id="daysCount">0</div>
+        <div class="quote" id="quote"></div>
+        <div class="now" id="nowIst"></div>
+      </div>
+    </main>
+    <!-- Embedded fallback config for file:// usage -->
+    <script id="default-config" type="application/json">
+{
+  "target": "2026-01-06",
+  "holidays": [
+    { "date": "2025-10-22", "name": "Diwali", "theme": "diwali" },
+    { "date": "2025-11-01", "name": "Karnataka Rajyotsava", "theme": "karnataka" },
+    { "date": "2025-12-25", "name": "Christmas", "theme": "christmas" },
+    { "date": "2026-01-01", "name": "New Year", "theme": "newyear" }
+  ],
+  "quotes": [
+    "Let your light shine softly, and the world will glow.",
+    "Small steps every day lead to big journeys.",
+    "Be gentle with yourself; you’re doing the best you can.",
+    "Dream in pastels and wake in purpose.",
+    "Carry love in your heart and kindness in your hands.",
+    "Each sunrise is a new invitation to hope.",
+    "Quiet confidence is the sweetest strength.",
+    "You are growing. That is beautiful.",
+    "Peace blooms where kindness is planted.",
+    "The softest waves shape the strongest shores.",
+    "Where you water it, love will flourish.",
+    "Grace finds you when you breathe and begin again.",
+    "Hold joy like a gentle candle in the wind.",
+    "May your day be light and your heart lighter.",
+    "Let today be lovely in small and certain ways.",
+    "Even the quietest stars still shine.",
+    "Choose calm. Choose care. Choose you.",
+    "Your kindness is a garden—let it grow.",
+    "Soft hearts carry the strongest courage.",
+    "Let patience paint your path in color."
+  ]
+}
+    </script>
+    <script src="viewer.js"></script>
+  </body>
+  </html>
+

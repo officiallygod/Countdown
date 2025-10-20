@@ -1,0 +1,155 @@
+// Fullscreen viewer: business-days countdown to target, IST-aware
+// Excludes Sundays and configured holidays. Pauses on excluded days.
+
+(function () {
+  const IST_OFFSET_MIN = 5 * 60 + 30; // +05:30
+
+  const elDays = document.getElementById('daysCount');
+  const elStatus = document.getElementById('status');
+  const elQuote = document.getElementById('quote');
+  const elNow = document.getElementById('nowIst');
+
+  let config = null;
+  let holidaySet = new Set();
+  let holidayMap = new Map(); // date -> { name, theme }
+
+  function nowInIST() {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const ist = new Date(utc + IST_OFFSET_MIN * 60000);
+    return {
+      y: ist.getUTCFullYear(),
+      m: ist.getUTCMonth(),
+      d: ist.getUTCDate(),
+      toDate: () => ist
+    };
+  }
+
+  function fmtYMD(y, m, d) {
+    const mm = String(m + 1).padStart(2, '0');
+    const dd = String(d).padStart(2, '0');
+    return `${y}-${mm}-${dd}`;
+  }
+
+  function dayOfWeek(y, m, d) {
+    return new Date(Date.UTC(y, m, d)).getUTCDay(); // 0=Sun
+  }
+
+  function addDays(ymd, n) {
+    const dt = new Date(Date.UTC(ymd.y, ymd.m, ymd.d));
+    dt.setUTCDate(dt.getUTCDate() + n);
+    return { y: dt.getUTCFullYear(), m: dt.getUTCMonth(), d: dt.getUTCDate() };
+  }
+
+  function isHoliday(ymd) {
+    return holidaySet.has(fmtYMD(ymd.y, ymd.m, ymd.d));
+  }
+
+  function computeBusinessDays(fromYMD, toYMD) {
+    const fromMs = Date.UTC(fromYMD.y, fromYMD.m, fromYMD.d);
+    const toMs = Date.UTC(toYMD.y, toYMD.m, toYMD.d);
+    if (fromMs > toMs) return 0;
+    let count = 0;
+    let cur = { ...fromYMD };
+    while (true) {
+      const dow = dayOfWeek(cur.y, cur.m, cur.d);
+      if (dow !== 0 && !isHoliday(cur)) count += 1;
+      if (cur.y === toYMD.y && cur.m === toYMD.m && cur.d === toYMD.d) break;
+      cur = addDays(cur, 1);
+    }
+    return count;
+  }
+
+  function setTheme(today) {
+    const dstr = fmtYMD(today.y, today.m, today.d);
+    const holiday = holidayMap.get(dstr);
+    document.body.className = '';
+    if (holiday) {
+      document.body.classList.add(`holiday-${holiday.theme}`);
+      elStatus.textContent = `Paused: Holiday — ${holiday.name}`;
+      return;
+    }
+    const dow = dayOfWeek(today.y, today.m, today.d);
+    if (dow === 0) {
+      document.body.classList.add('sunday');
+      elStatus.textContent = 'Paused: Sunday (IST)';
+      return;
+    }
+    elStatus.textContent = 'Counting active';
+  }
+
+  function quoteOfTheDay(today, quotes) {
+    if (!quotes || !quotes.length) return '';
+    const base = Date.UTC(today.y, today.m, today.d) / 86400000; // day index
+    const idx = Math.abs(Math.floor(base)) % quotes.length;
+    return quotes[idx];
+  }
+
+  function recompute() {
+    if (!config) return;
+    const today = nowInIST();
+    const targetParts = config.target.split('-').map(Number);
+    const target = { y: targetParts[0], m: targetParts[1] - 1, d: targetParts[2] };
+
+    // Determine the next working day >= today
+    let nextBiz = { y: today.y, m: today.m, d: today.d };
+    while (true) {
+      const dow = dayOfWeek(nextBiz.y, nextBiz.m, nextBiz.d);
+      if (dow !== 0 && !isHoliday(nextBiz)) break;
+      nextBiz = addDays(nextBiz, 1);
+      if (Date.UTC(nextBiz.y, nextBiz.m, nextBiz.d) > Date.UTC(target.y, target.m, target.d)) break;
+    }
+
+    let days = computeBusinessDays(nextBiz, target);
+
+    const todayMs = Date.UTC(today.y, today.m, today.d);
+    const tgtMs = Date.UTC(target.y, target.m, target.d);
+    const todayIsExcluded = dayOfWeek(today.y, today.m, today.d) === 0 || isHoliday(today);
+    if (todayIsExcluded && todayMs <= tgtMs) days = days + 1; // pause effect
+
+    elDays.textContent = String(days);
+    setTheme(today);
+
+    const dtf = new Intl.DateTimeFormat(undefined, {
+      timeZone: 'Asia/Kolkata', weekday: 'short', year: 'numeric', month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+    elNow.textContent = `Now (IST): ${dtf.format(new Date())}`;
+
+    elQuote.textContent = quoteOfTheDay(today, config.quotes);
+  }
+
+  async function loadConfig() {
+    // Try external config.json first
+    try {
+      const res = await fetch('config.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      config = await res.json();
+    } catch (_) {
+      // Fallback: embedded JSON in viewer.html
+      const el = document.getElementById('default-config');
+      if (!el) throw new Error('No config available');
+      try {
+        config = JSON.parse(el.textContent || '{}');
+      } catch (e) {
+        throw new Error('Invalid embedded config');
+      }
+    }
+    // Build holiday sets
+    holidaySet = new Set((config.holidays || []).map(h => h.date));
+    holidayMap = new Map((config.holidays || []).map(h => [h.date, { name: h.name, theme: h.theme }]));
+    recompute();
+  }
+
+  function tick() {
+    setInterval(recompute, 30_000);
+  }
+
+  loadConfig().catch((e) => {
+    elStatus.textContent = 'Failed to load configuration';
+    console.error(e);
+  });
+  tick();
+  recompute();
+})();
+

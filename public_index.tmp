@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Countdown (Business Days to Jan 6, 2026)</title>
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <h1>Days Left</h1>
+        <div class="sub">to Jan 6, 2026 (IST)</div>
+      </header>
+
+      <section class="counter">
+        <div id="daysCount" class="days">0</div>
+        <div id="status" class="status" aria-live="polite"></div>
+        <div id="nowIst" class="now"></div>
+      </section>
+
+      <section class="holidays">
+        <h2>Custom Holidays</h2>
+        <p class="help">Excluded from the count. Dates are treated in IST.</p>
+        <form id="holidayForm" class="holiday-form">
+          <label>
+            Date
+            <input type="date" id="holidayDate" required />
+          </label>
+          <label>
+            Label (optional)
+            <input type="text" id="holidayLabel" placeholder="e.g., Diwali" />
+          </label>
+          <button type="submit">Add</button>
+        </form>
+        <ul id="holidayList" class="holiday-list"></ul>
+        <button id="clearHolidays" class="clear">Clear All</button>
+      </section>
+
+      <footer class="footer">
+        <small>Excludes Sundays and listed holidays. Uses IST.</small>
+      </footer>
+    </main>
+
+    <script src="../assets/js/main.js"></script>
+  </body>
+  </html>
+
