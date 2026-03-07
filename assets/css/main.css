@@ -208,3 +208,152 @@ body {
   color: var(--muted);
   text-align: center;
 }
+
+/* Quote of the Day card */
+.quote-section {
+  margin-top: 20px;
+}
+
+.quote-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.quote-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.main-quote {
+  margin: 0;
+  font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  color: var(--ink);
+  line-height: 1.6;
+  font-style: italic;
+  max-width: 680px;
+}
+
+.quote-refresh {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--accent-2);
+  color: #5a2a40;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.quote-refresh:hover {
+  filter: brightness(0.96);
+}
+
+/* Progress bar */
+.progress-section {
+  margin-top: 24px;
+  padding: 20px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.progress-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.progress-pct {
+  font-weight: 700;
+  font-size: 1.05rem;
+  background-image: linear-gradient(45deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.progress-track {
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  width: 0%;
+  transition: width 0.6s ease;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .container {
+    padding: 16px 12px 32px;
+  }
+
+  .counter {
+    padding: 16px;
+  }
+
+  .holiday-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .holiday-form label {
+    width: 100%;
+  }
+
+  .holiday-form input[type="date"],
+  .holiday-form input[type="text"] {
+    width: 100%;
+  }
+
+  .holiday-form button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .quote-card {
+    padding: 16px;
+  }
+
+  .progress-section {
+    padding: 16px;
+  }
+
+  .progress-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

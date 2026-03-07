@@ -71,6 +71,26 @@
 	}
 	// Config holidays (from data/config.json or embedded default)
 	let configHolidaySet = new Set();
+	let allQuotes = [];
+	let currentQuoteIdx = -1;
+
+	function pickNextQuote() {
+		if (!allQuotes.length) return '';
+		// Pick a deterministic default based on today, then allow manual cycling
+		if (currentQuoteIdx === -1) {
+			const now = nowInIST();
+			const base = Math.floor(Date.UTC(now.y, now.m, now.d) / 86400000);
+			currentQuoteIdx = Math.abs(base) % allQuotes.length;
+		} else {
+			currentQuoteIdx = (currentQuoteIdx + 1) % allQuotes.length;
+		}
+		return allQuotes[currentQuoteIdx];
+	}
+
+	function renderQuote() {
+		const $q = document.getElementById('mainQuote');
+		if ($q) $q.textContent = pickNextQuote();
+	}
 	async function loadConfig() {
 		try {
 			const res = await fetch('../data/config.json', { cache: 'no-store' });
@@ -83,6 +103,9 @@
 			if (cfg && Array.isArray(cfg.holidays)) {
 				configHolidaySet = new Set(cfg.holidays.map((h) => h.date));
 			}
+			if (cfg && Array.isArray(cfg.quotes)) {
+				allQuotes = cfg.quotes;
+			}
 		} catch (_) {
 			const el = document.getElementById('default-config');
 			if (el) {
@@ -94,6 +117,9 @@
 					}
 					if (cfg && Array.isArray(cfg.holidays)) {
 						configHolidaySet = new Set(cfg.holidays.map((h) => h.date));
+					}
+					if (cfg && Array.isArray(cfg.quotes)) {
+						allQuotes = cfg.quotes;
 					}
 				} catch {}
 			}
@@ -226,6 +252,38 @@
 			second: '2-digit',
 		});
 		$nowIst.textContent = `Now (IST): ${dtf.format(new Date())}`;
+
+		// Update progress bar
+		updateProgress(days, today, target, holidaySet);
+	}
+
+	// Progress bar: business days elapsed vs. total from a reference start date
+	// Reference start: earliest quotesByDate or the first configured holiday, whichever is earlier
+	const PROGRESS_START = { y: 2025, m: 9, d: 20 }; // 2025-10-20 (0-based month)
+
+	function updateProgress(remainingDays, today, target, holidaySet) {
+		const $bar = document.getElementById('progressBar');
+		const $pct = document.getElementById('progressPct');
+		const $elapsed = document.getElementById('progressElapsed');
+		const $track = document.querySelector('.progress-track');
+		if (!$bar || !$pct) return;
+
+		const startMs = Date.UTC(PROGRESS_START.y, PROGRESS_START.m, PROGRESS_START.d);
+		const tgtMs = Date.UTC(target.y, target.m, target.d);
+		const todayMs = Date.UTC(today.y, today.m, today.d);
+
+		const totalDays = computeBusinessDays(PROGRESS_START, target, holidaySet);
+		const elapsedDays = totalDays - remainingDays;
+		const pct = totalDays > 0 ? Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100))) : 0;
+
+		$bar.style.width = pct + '%';
+		$pct.textContent = pct + '%';
+		if ($track) {
+			$track.setAttribute('aria-valuenow', String(pct));
+		}
+		if ($elapsed) {
+			$elapsed.textContent = `Day ${Math.max(1, elapsedDays)}`;
+		}
 	}
 
 	function scheduleNextTick() {
@@ -240,6 +298,13 @@
 		await loadConfig();
 		renderHolidays(loadHolidays());
 		recompute();
+		renderQuote();
+		const $refresh = document.getElementById('refreshQuote');
+		if ($refresh) {
+			$refresh.addEventListener('click', () => {
+				renderQuote();
+			});
+		}
 		scheduleNextTick();
 	})();
 })();
