@@ -13,9 +13,7 @@
 
 /* Themes set via CSS variables from JS */
 
-*,
-*::before,
-*::after {
+* {
   box-sizing: border-box;
 }
 
@@ -29,18 +27,15 @@ body {
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
   color: var(--ink);
   background: linear-gradient(145deg, var(--bg-1) 0%, var(--bg-2) 100%);
-  background-attachment: fixed;
   overflow-x: hidden;
-  transition: background 0.7s ease;
+  transition: background 0.6s ease;
 }
-
-/* ── Stage layout ────────────────────────────────────────── */
 
 .stage {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 24px 24px 80px;
+  padding: 24px;
   position: relative;
 }
 
@@ -49,7 +44,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(12px, 2.2vh, 28px);
+  gap: 2vh;
   position: relative;
   z-index: 3;
   animation: page-in 0.8s ease both;
@@ -60,27 +55,20 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Status badge ─────────────────────────────────────────── */
-
 .status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   color: var(--muted);
   font-weight: 600;
-  font-size: clamp(11px, 1.4vw, 16px);
-  letter-spacing: 0.08em;
+  font-size: clamp(14px, 1.6vw, 20px);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   background: var(--card-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--card-border);
   border-radius: 999px;
-  padding: 5px 16px;
+  padding: 5px 18px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
-
-/* ── Days number ──────────────────────────────────────────── */
 
 .days-wrap {
   width: 100%;
@@ -88,13 +76,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: min(60vh, 85vw);
+  height: min(62vh, 88vw);
 }
 
 .days {
   display: inline-block;
   font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  font-size: 120px; /* JS will resize */
+  font-size: 120px;
+  /* JS will resize */
   font-weight: 900;
   line-height: 1;
   background-image: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 100%);
@@ -104,20 +93,21 @@ body {
   white-space: nowrap;
   letter-spacing: -0.03em;
   will-change: font-size;
-  filter: drop-shadow(0 6px 28px rgba(0, 0, 0, 0.09));
+  filter: drop-shadow(0 4px 24px rgba(0,0,0,0.07));
   animation: count-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
 }
 
 @keyframes count-in {
-  from { opacity: 0; transform: scale(0.82); filter: drop-shadow(0 0 0 transparent); }
+  from { opacity: 0; transform: scale(0.82); }
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* ── Quote card (glassmorphism) ───────────────────────────── */
-
 .quote {
   position: relative;
-  margin-top: 4px;
+  margin-top: 8px;
+  font-size: clamp(15px, 2vw, 26px);
+  color: var(--ink);
+  opacity: 0.92;
   padding: 18px 28px;
   max-width: min(860px, 90vw);
   background: var(--card-bg);
@@ -126,11 +116,8 @@ body {
   border: 1px solid var(--card-border);
   border-radius: 20px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
-  font-size: clamp(14px, 1.9vw, 24px);
-  font-family: 'Nunito Sans', 'Inter', system-ui, sans-serif;
-  color: var(--ink);
-  opacity: 0.92;
-  line-height: 1.55;
+  font-family: 'Nunito Sans', 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.5;
   word-break: break-word;
   hyphens: auto;
   cursor: pointer;
@@ -165,9 +152,8 @@ body {
   transform: scale(0.98);
 }
 
-/* Tap hint overlay on quote */
 .quote::after {
-  content: "✨ tap for a new quote";
+  content: "\2728 tap for a new quote";
   position: absolute;
   bottom: -26px;
   left: 50%;
@@ -185,8 +171,7 @@ body {
   opacity: 0.7;
 }
 
-/* ── Progress bar ─────────────────────────────────────────── */
-
+/* Journey progress bar */
 .progress-bar-wrap {
   position: fixed;
   bottom: 0;
@@ -218,17 +203,11 @@ body {
   overflow: hidden;
 }
 
-/* Shimmer on progress bar fill */
 .progress-bar-fill::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.5) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.5) 50%, transparent 100%);
   animation: shimmer 2.4s ease-in-out infinite;
   transform: translateX(-100%);
 }
@@ -249,8 +228,7 @@ body {
   font-weight: 500;
 }
 
-/* ── Holiday decorative badges ────────────────────────────── */
-
+/* Holiday decorative badges */
 .badge {
   position: fixed;
   top: 12px;
@@ -259,9 +237,10 @@ body {
   display: flex;
   justify-content: space-between;
   pointer-events: none;
-  z-index: 5;
+  z-index: 0;
 }
 
+/* Karnataka flag: two horizontal stripes */
 [data-theme="karnataka"] .badge::before {
   content: "";
   display: inline-block;
@@ -273,6 +252,7 @@ body {
   animation: float 5s ease-in-out infinite;
 }
 
+/* Diwali lamp (emoji) */
 [data-theme="diwali"] .badge::after {
   content: "🪔";
   font-size: 26px;
@@ -280,20 +260,21 @@ body {
   animation: float 6s ease-in-out infinite;
 }
 
+/* Christmas decorations */
 [data-theme="christmas"] .badge::after {
   content: "🎅 🎄 🎄";
   font-size: 24px;
   animation: float 7s ease-in-out infinite;
 }
 
+/* New Year fireworks */
 [data-theme="newyear"] .badge::after {
   content: "🎆 🎇 🎆";
   font-size: 22px;
   animation: float 7s ease-in-out infinite;
 }
 
-/* ── Decorative elements ──────────────────────────────────── */
-
+/* Decorative themed images */
 .decor {
   position: fixed;
   inset: 0;
@@ -313,16 +294,36 @@ body {
   position: absolute;
   opacity: 0;
   transform: translateY(10px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition: opacity .6s ease, transform .6s ease;
 }
 
-[data-theme="diwali"] .d-decor.diwali   { opacity: 1; }
-[data-theme="christmas"] .d-decor.christmas { opacity: 1; }
-[data-theme="newyear"] .d-decor.newyear   { opacity: 1; }
+[data-theme="diwali"] .d-decor.diwali {
+  opacity: 1;
+}
 
-.diya { width: 96px; animation: flicker 1.8s infinite ease-in-out; }
-.diya-left  { bottom: 20px; left: 18px; }
-.diya-right { bottom: 20px; right: 18px; animation-delay: 0.6s; }
+[data-theme="christmas"] .d-decor.christmas {
+  opacity: 1;
+}
+
+[data-theme="newyear"] .d-decor.newyear {
+  opacity: 1;
+}
+
+.diya {
+  width: 96px;
+  animation: flicker 1.8s infinite ease-in-out;
+}
+
+.diya-left {
+  bottom: 20px;
+  left: 18px;
+}
+
+.diya-right {
+  bottom: 20px;
+  right: 18px;
+  animation-delay: .6s;
+}
 
 .candle {
   width: 60px;
@@ -332,8 +333,19 @@ body {
   animation: flicker 1.5s infinite ease-in-out;
 }
 
-.santa { top: 16px; right: 18px; width: 84px; animation: float 6s ease-in-out infinite; }
-.tree  { bottom: 16px; left: 16px; width: 90px; animation: float 7s ease-in-out infinite; }
+.santa {
+  top: 16px;
+  right: 18px;
+  width: 84px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.tree {
+  bottom: 16px;
+  left: 16px;
+  width: 90px;
+  animation: float 7s ease-in-out infinite;
+}
 
 .fireworks {
   width: 90px;
@@ -342,10 +354,92 @@ body {
   transform: translateX(-50%);
   animation: twinkle 1.8s ease-in-out infinite;
 }
-.fireworks.f2 { top: 18%; left: 70%; animation-delay: 0.9s; }
 
-/* ── Diwali light garland ─────────────────────────────────── */
+.fireworks.f2 {
+  top: 18%;
+  left: 70%;
+  animation-delay: .9s;
+}
 
+@keyframes flicker {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 170, 0, .6)) brightness(1);
+    transform: translateY(10px) scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(255, 190, 60, .9)) brightness(1.05);
+    transform: translateY(10px) scale(1.03);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: .6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* Snow, confetti, petals */
+.snowflake {
+  position: absolute;
+  top: -10%;
+  width: var(--sz, 8px);
+  height: var(--sz, 8px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .95), rgba(255, 255, 255, .6));
+  opacity: .9;
+  animation: snow-fall var(--dur, 12s) linear infinite;
+  left: var(--left, 50%);
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, .7));
+}
+
+@keyframes snow-fall {
+  0% { transform: translateY(0) translateX(0); }
+  100% { transform: translateY(120vh) translateX(var(--drift, 20px)); }
+}
+
+.confetti {
+  position: absolute;
+  top: -10%;
+  width: var(--w, 6px);
+  height: var(--h, 10px);
+  background: var(--c, #ff9aa2);
+  opacity: .9;
+  transform: rotate(var(--rot, 0deg));
+  animation: confetti-fall var(--dur, 8s) linear infinite;
+  left: var(--left, 50%);
+  border-radius: 2px;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .08));
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  100% { transform: translateY(120vh) rotate(calc(var(--rot, 0deg) + 360deg)); }
+}
+
+.petal {
+  position: absolute;
+  top: -10%;
+  width: var(--sz, 12px);
+  height: var(--sz, 18px);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 218, 68, .9), rgba(255, 100, 100, .85));
+  border-radius: 60% 40% 60% 40% / 60% 60% 40% 40%;
+  transform: rotate(var(--rot, 0deg));
+  opacity: .85;
+  left: var(--left, 50%);
+  animation: petal-fall var(--dur, 10s) ease-in infinite;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .1));
+}
+
+@keyframes petal-fall {
+  0% { transform: translateY(0) translateX(0) rotate(var(--rot, 0deg)); }
+  100% { transform: translateY(120vh) translateX(var(--drift, 30px)) rotate(calc(var(--rot, 0deg) + 60deg)); }
+}
+
+/* Diwali lights garland */
 .lights {
   position: fixed;
   top: 0;
@@ -357,8 +451,8 @@ body {
   justify-content: space-evenly;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.4s ease;
-  z-index: 6;
+  transition: opacity .4s ease;
+  z-index: 3;
 }
 
 .bulb {
@@ -366,7 +460,7 @@ body {
   height: 12px;
   border-radius: 50%;
   margin-top: 8px;
-  box-shadow: 0 0 8px rgba(255, 190, 60, 0.6);
+  box-shadow: 0 0 8px rgba(255, 190, 60, .6);
   animation: blink var(--blink, 2.6s) ease-in-out infinite;
   position: relative;
 }
@@ -383,105 +477,40 @@ body {
   border-radius: 1px;
 }
 
-[data-theme="diwali"] .lights { opacity: 1; }
-
-/* ── Effect particles ─────────────────────────────────────── */
-
-.snowflake {
-  position: absolute;
-  top: -10%;
-  width: var(--sz, 8px);
-  height: var(--sz, 8px);
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.6));
-  opacity: 0.9;
-  animation: snow-fall var(--dur, 12s) linear infinite;
-  left: var(--left, 50%);
-  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
-}
-
-.confetti {
-  position: absolute;
-  top: -10%;
-  width: var(--w, 6px);
-  height: var(--h, 10px);
-  background: var(--c, #ff9aa2);
-  opacity: 0.9;
-  transform: rotate(var(--rot, 0deg));
-  animation: confetti-fall var(--dur, 8s) linear infinite;
-  left: var(--left, 50%);
-  border-radius: 2px;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
-}
-
-.petal {
-  position: absolute;
-  top: -10%;
-  width: var(--sz, 12px);
-  height: var(--sz, 18px);
-  background: radial-gradient(circle at 30% 30%, rgba(255, 218, 68, 0.9), rgba(255, 100, 100, 0.85));
-  border-radius: 60% 40% 60% 40% / 60% 60% 40% 40%;
-  transform: rotate(var(--rot, 0deg));
-  opacity: 0.85;
-  left: var(--left, 50%);
-  animation: petal-fall var(--dur, 10s) ease-in infinite;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
-}
-
-/* ── Keyframes ────────────────────────────────────────────── */
-
-@keyframes flicker {
-  0%, 100% {
-    filter: drop-shadow(0 0 10px rgba(255, 170, 0, 0.6)) brightness(1);
-    transform: translateY(10px) scale(1);
-  }
-  50% {
-    filter: drop-shadow(0 0 16px rgba(255, 190, 60, 0.9)) brightness(1.05);
-    transform: translateY(10px) scale(1.03);
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
-}
-
-@keyframes twinkle {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50%      { opacity: 1;   transform: scale(1.15); }
+[data-theme="diwali"] .lights {
+  opacity: 1;
 }
 
 @keyframes blink {
-  0%, 100% { filter: brightness(1) saturate(1); opacity: 0.7; }
-  50%      { filter: brightness(1.3) saturate(1.2); opacity: 1; }
+  0%, 100% { filter: brightness(1) saturate(1); opacity: .7; }
+  50% { filter: brightness(1.3) saturate(1.2); opacity: 1; }
 }
 
-@keyframes snow-fall {
-  0%   { transform: translateY(0) translateX(0); }
-  100% { transform: translateY(120vh) translateX(var(--drift, 20px)); }
-}
-
-@keyframes confetti-fall {
-  0%   { transform: translateY(0) rotate(var(--rot, 0deg)); }
-  100% { transform: translateY(120vh) rotate(calc(var(--rot, 0deg) + 360deg)); }
-}
-
-@keyframes petal-fall {
-  0%   { transform: translateY(0) translateX(0) rotate(var(--rot, 0deg)); }
-  100% { transform: translateY(120vh) translateX(var(--drift, 30px)) rotate(calc(var(--rot, 0deg) + 60deg)); }
-}
-
-/* ── Responsive ───────────────────────────────────────────── */
-
+/* Responsive tweaks */
 @media (min-width: 1440px) {
   .center { gap: 2vh; }
   .quote  { max-width: 960px; }
 }
 
 @media (min-width: 1024px) {
-  .center    { gap: 1.6vh; }
-  .quote     { margin-top: 6px; max-width: 800px; }
+  .center { gap: 1.6vh; }
+  .quote { margin-top: 6px; max-width: 800px; }
   .days-wrap { height: min(52vh, 72vw); }
+}
+
+@media (max-width: 480px) {
+  [data-theme="karnataka"] .badge::before { width: 44px; height: 30px; }
+  [data-theme="diwali"] .badge::after { font-size: 20px; }
+  [data-theme="christmas"] .badge::after { font-size: 18px; }
+  [data-theme="newyear"] .badge::after { font-size: 18px; }
+  .diya { width: 72px; }
+  .candle { width: 48px; }
+  .santa { width: 70px; }
+  .tree { width: 76px; }
+  .fireworks, .fireworks.f2 { width: 72px; }
+  .quote { padding: 12px 16px; border-radius: 14px; }
+  .progress-bar-wrap { padding: 6px 14px 12px; }
+  .stage { padding-bottom: 60px; }
 }
 
 @media (max-width: 768px) {
@@ -490,23 +519,8 @@ body {
   .stage { padding-bottom: 68px; }
 }
 
-@media (max-width: 480px) {
-  [data-theme="karnataka"] .badge::before { width: 44px; height: 30px; }
-  [data-theme="diwali"] .badge::after    { font-size: 20px; }
-  [data-theme="christmas"] .badge::after { font-size: 18px; }
-  [data-theme="newyear"] .badge::after   { font-size: 18px; }
-  .diya    { width: 72px; }
-  .candle  { width: 48px; }
-  .santa   { width: 70px; }
-  .tree    { width: 76px; }
-  .fireworks, .fireworks.f2 { width: 72px; }
-  .quote   { padding: 12px 16px; border-radius: 14px; }
-  .progress-bar-wrap { padding: 6px 14px 12px; }
-  .stage   { padding-bottom: 60px; }
-}
-
 @media (max-width: 360px) {
-  .status { font-size: 10px; padding: 4px 12px; }
+  .status { font-size: 11px; padding: 4px 12px; }
   .quote  { padding: 10px 14px; font-size: 13px; }
   .progress-bar-label { font-size: 10px; }
 }

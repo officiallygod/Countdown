@@ -20,9 +20,11 @@
 	let holidaySet = new Set();
 	let holidayMap = new Map(); // date -> { name, theme }
 	let quotesByDate = {};
+	let lastThemeKey = null;
+
+	// Quote cycling state
 	let allQuotes = [];
 	let currentQuoteIdx = -1;
-	let lastThemeKey = null;
 
 	// Progress start reference (Oct 20, 2025)
 	const PROGRESS_START = { y: 2025, m: 9, d: 20 };
@@ -107,6 +109,14 @@
 		const idx = Math.abs(base) % quotes.length;
 		return quotes[idx];
 	}
+	function quoteForDate(today, quotesMap, fallbackQuotes) {
+		const dstr = fmtYMD(today.y, today.m, today.d);
+		if (quotesMap && Object.prototype.hasOwnProperty.call(quotesMap, dstr))
+			return quotesMap[dstr];
+		return quoteOfTheDay(today, fallbackQuotes);
+	}
+
+	// Interactive quote cycling
 	function initQuoteIndex(today) {
 		if (currentQuoteIdx === -1) {
 			const base = Math.floor(Date.UTC(today.y, today.m, today.d) / 86400000);
@@ -116,8 +126,7 @@
 	function showQuote(text) {
 		if (!elQuote) return;
 		elQuote.classList.remove('quote-fade');
-		// Trigger reflow to restart animation
-		void elQuote.offsetWidth;
+		void elQuote.offsetWidth; // Trigger reflow to restart animation
 		elQuote.classList.add('quote-fade');
 		elQuote.textContent = text;
 	}
@@ -200,17 +209,10 @@
 		// Effects
 		updateEffects(themeKey);
 
-		// Quote — only set on first call; cycling is user-driven
+		// Quote — only set on first recompute; subsequent changes are user-driven
 		if (currentQuoteIdx === -1) {
-			const dstr = fmtYMD(today.y, today.m, today.d);
-			const hasDateQuote =
-				quotesByDate && Object.prototype.hasOwnProperty.call(quotesByDate, dstr);
-			if (hasDateQuote) {
-				showQuote(quotesByDate[dstr]);
-			} else {
-				initQuoteIndex(today);
-				showQuote(allQuotes[currentQuoteIdx] || '');
-			}
+			showQuote(quoteForDate(today, quotesByDate, allQuotes));
+			initQuoteIndex(today);
 		}
 
 		// Progress bar
@@ -261,7 +263,7 @@
 		elStatus.textContent = 'Failed to load configuration';
 	});
 
-	// Progress bar
+	// Journey progress bar
 	function updateProgress(remainingDays, target) {
 		const elFill = document.getElementById('progressFill');
 		const elPct = document.getElementById('progressPct');
@@ -298,7 +300,7 @@
 		if (!meas) {
 			meas = document.createElement('span');
 			meas.id = 'measure-days';
-			meas.style.cssText = 'position:absolute;left:-9999px;top:0;white-space:nowrap';
+			meas.style.cssText = 'position: absolute; left: -9999px; top: 0; white-space: nowrap';
 			meas.style.fontFamily = getComputedStyle(elDays).fontFamily;
 			meas.style.fontWeight = getComputedStyle(elDays).fontWeight;
 			document.body.appendChild(meas);
@@ -327,5 +329,3 @@
 		else if (themeKey === 'diwali') Effects.buildLights(elLights, 24);
 	}
 })();
-
-
