@@ -21,7 +21,17 @@
       <div class="days-wrap">
         <div class="days" id="daysCount">0</div>
       </div>
-      <div class="quote" id="quote"></div>
+      <div class="quote" id="quote" role="button" tabindex="0" aria-label="Daily quote — tap for a new one"></div>
+    </div>
+    <div class="progress-bar-wrap" aria-label="Journey progress">
+      <div class="progress-bar-inner">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-bar-label">
+        <span id="progressLabel">Day 1</span>
+        <span id="progressPct">0%</span>
+        <span>🎯 Apr 1, 2028</span>
+      </div>
     </div>
     <div class="effects" id="effects" aria-hidden="true"></div>
     <div class="lights" id="lights" aria-hidden="true"></div>
@@ -42,15 +52,31 @@
 {
   "target": "2028-04-01",
   "holidays": [
-    { "date": "2025-10-22", "name": "Diwali", "theme": "diwali" },
-    { "date": "2025-11-01", "name": "Karnataka Rajyotsava", "theme": "karnataka" },
-    { "date": "2025-12-25", "name": "Christmas", "theme": "christmas" },
-    { "date": "2026-01-01", "name": "New Year", "theme": "newyear" }
+    {
+      "date": "2025-10-22",
+      "name": "Diwali",
+      "theme": "diwali"
+    },
+    {
+      "date": "2025-11-01",
+      "name": "Karnataka Rajyotsava",
+      "theme": "karnataka"
+    },
+    {
+      "date": "2025-12-25",
+      "name": "Christmas",
+      "theme": "christmas"
+    },
+    {
+      "date": "2026-01-01",
+      "name": "New Year",
+      "theme": "newyear"
+    }
   ],
   "quotes": [
     "Let your light shine softly, and the world will glow.",
     "Small steps every day lead to big journeys.",
-    "Be gentle with yourself; you're doing the best you can.",
+    "Be gentle with yourself; you’re doing the best you can.",
     "Dream in pastels and wake in purpose.",
     "Carry love in your heart and kindness in your hands.",
     "Each sunrise is a new invitation to hope.",
@@ -96,7 +122,53 @@
     "You are more capable than your doubts allow.",
     "Kindness is a language the heart remembers.",
     "Let hope take root and grow.",
-    "Your light belongs here, let it glow."
+    "Your light belongs here, let it glow.",
+    "One day or day one — you decide! 🚀",
+    "Spoiler alert: you’re going to make it! 🎉",
+    "Your future self is cheering you on right now! 🙌",
+    "Progress, not perfection. Every step counts. 💪",
+    "You don’t have to be great to start, but you have to start to be great.",
+    "The secret of getting ahead is getting started.",
+    "Every expert was once a beginner. Keep going. ⭐",
+    "Hard work beats talent when talent doesn’t work hard. 💥",
+    "Be so good they can’t ignore you.",
+    "Success is the sum of small efforts, repeated day in and day out.",
+    "Focus on the step right in front of you, not the whole staircase.",
+    "Your consistency will outperform their talent.",
+    "The harder you work, the luckier you get.",
+    "Action is the foundational key to all success.",
+    "Believe you can and you’re halfway there.",
+    "The only way to do great work is to love what you do. ❤️",
+    "Level up a little every single day. 🎮",
+    "Today’s effort is tomorrow’s reward. 🌟",
+    "Coffee and determination: the ultimate combo. ☕",
+    "Done is better than perfect — ship it! 🛸",
+    "Don’t count the days; make the days count.",
+    "If it was easy, everyone would do it. You’re not everyone.",
+    "The comeback is always stronger than the setback.",
+    "Dream big. Start small. Act now.",
+    "You’ve survived 100% of your worst days so far. That’s a perfect record! 😄",
+    "Momentum is magic — keep moving.",
+    "Fall seven times, stand up eight.",
+    "Great things never come from comfort zones.",
+    "Push yourself, because no one else is going to do it for you.",
+    "The pain of discipline is nothing compared to the pain of regret.",
+    "You are closer than you think.",
+    "It always seems impossible until it’s done.",
+    "Tiny progress is still progress. Celebrate it! 🎊",
+    "Turn ‘I wish’ into ‘I will’.",
+    "Your only limit is your mind.",
+    "Hustle in silence; let success make the noise.",
+    "Be the energy you want to attract.",
+    "Rise up, start fresh, see the bright opportunity in each new day.",
+    "Strive for progress, not perfection.",
+    "Wake up with determination. Go to bed with satisfaction.",
+    "You are braver than you believe, stronger than you seem, and smarter than you think.",
+    "Every morning is a new chance to start again. ☀️",
+    "Work hard in silence; let your success be your noise.",
+    "The future belongs to those who believe in the beauty of their dreams.",
+    "What you do today can improve all your tomorrows.",
+    "Keep going. Everything you need will come to you at the perfect time."
   ],
   "quotesByDate": {
     "2025-10-20": "I choose you today, tomorrow, and every gentle morning after.",

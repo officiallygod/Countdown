@@ -22,6 +22,13 @@
 	let quotesByDate = {};
 	let lastThemeKey = null;
 
+	// Quote cycling state
+	let allQuotes = [];
+	let currentQuoteIdx = -1;
+
+	// Progress start reference (Oct 20, 2025)
+	const PROGRESS_START = { y: 2025, m: 9, d: 20 };
+
 	// IST utilities
 	function nowInIST() {
 		const now = new Date();
@@ -109,6 +116,26 @@
 		return quoteOfTheDay(today, fallbackQuotes);
 	}
 
+	// Interactive quote cycling
+	function initQuoteIndex(today) {
+		if (currentQuoteIdx === -1) {
+			const base = Math.floor(Date.UTC(today.y, today.m, today.d) / 86400000);
+			currentQuoteIdx = Math.abs(base) % (allQuotes.length || 1);
+		}
+	}
+	function showQuote(text) {
+		if (!elQuote) return;
+		elQuote.classList.remove('quote-fade');
+		void elQuote.offsetWidth; // Trigger reflow to restart animation
+		elQuote.classList.add('quote-fade');
+		elQuote.textContent = text;
+	}
+	function cycleQuote() {
+		if (!allQuotes.length) return;
+		currentQuoteIdx = (currentQuoteIdx + 1) % allQuotes.length;
+		showQuote(allQuotes[currentQuoteIdx]);
+	}
+
 	// Query handling
 	function getQuery() {
 		const q = new URLSearchParams(location.search);
@@ -182,8 +209,21 @@
 		// Effects
 		updateEffects(themeKey);
 
-		// Quote
-		elQuote.textContent = quoteForDate(today, quotesByDate, config.quotes);
+		// Quote — only set on first recompute; subsequent changes are user-driven
+		if (currentQuoteIdx === -1) {
+			const dstr = fmtYMD(today.y, today.m, today.d);
+			if (quotesByDate && Object.prototype.hasOwnProperty.call(quotesByDate, dstr)) {
+				// Date-specific quote: show it; cycling starts from index 0 on first tap
+				showQuote(quotesByDate[dstr]);
+			} else {
+				// Deterministic daily quote: set index so cycling continues from here
+				initQuoteIndex(today);
+				showQuote(allQuotes[currentQuoteIdx] || '');
+			}
+		}
+
+		// Progress bar
+		updateProgress(days, target);
 
 		// Fit number
 		autosizeDays();
@@ -209,14 +249,52 @@
 			loadJSON('../data/themes.json', 'default-themes'),
 		]);
 		quotesByDate = config.quotesByDate || {};
+		allQuotes = config.quotes || [];
 		recompute();
 		setInterval(recompute, 30_000);
 		window.addEventListener('resize', autosizeDays);
+
+		// Quote cycling on tap/click/keyboard
+		if (elQuote) {
+			elQuote.addEventListener('click', cycleQuote);
+			elQuote.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					cycleQuote();
+				}
+			});
+		}
 	}
 	boot().catch((err) => {
 		console.error('Boot error:', err);
 		elStatus.textContent = 'Failed to load configuration';
 	});
+
+	// Journey progress bar
+	function updateProgress(remainingDays, target) {
+		const elFill = document.getElementById('progressFill');
+		const elPct = document.getElementById('progressPct');
+		const elLabel = document.getElementById('progressLabel');
+		if (!elFill || !elPct) return;
+		const totalDays = computeBusinessDays(PROGRESS_START, target);
+		const elapsedDays = Math.max(0, totalDays - remainingDays);
+		const pct =
+			totalDays > 0
+				? Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)))
+				: 0;
+		elFill.style.width = pct + '%';
+		elPct.textContent = pct + '%';
+		if (elLabel) {
+			elLabel.textContent = elapsedDays > 0 ? `Day ${elapsedDays}` : 'Not started';
+		}
+		const track = document.querySelector('.progress-bar-inner');
+		if (track) {
+			track.setAttribute('role', 'progressbar');
+			track.setAttribute('aria-valuenow', String(pct));
+			track.setAttribute('aria-valuemin', '0');
+			track.setAttribute('aria-valuemax', '100');
+		}
+	}
 
 	// Fit big number to container (~85% width)
 	function autosizeDays() {
