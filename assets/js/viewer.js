@@ -26,9 +26,6 @@
 	let allQuotes = [];
 	let currentQuoteIdx = -1;
 
-	// Progress start reference (Oct 20, 2025)
-	const PROGRESS_START = { y: 2025, m: 9, d: 20 };
-
 	// IST utilities
 	function nowInIST() {
 		const now = new Date();
@@ -222,9 +219,6 @@
 			}
 		}
 
-		// Progress bar
-		updateProgress(days, target);
-
 		// Fit number
 		autosizeDays();
 	}
@@ -269,32 +263,6 @@
 		console.error('Boot error:', err);
 		elStatus.textContent = 'Failed to load configuration';
 	});
-
-	// Journey progress bar
-	function updateProgress(remainingDays, target) {
-		const elFill = document.getElementById('progressFill');
-		const elPct = document.getElementById('progressPct');
-		const elLabel = document.getElementById('progressLabel');
-		if (!elFill || !elPct) return;
-		const totalDays = computeBusinessDays(PROGRESS_START, target);
-		const elapsedDays = Math.max(0, totalDays - remainingDays);
-		const pct =
-			totalDays > 0
-				? Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)))
-				: 0;
-		elFill.style.width = pct + '%';
-		elPct.textContent = pct + '%';
-		if (elLabel) {
-			elLabel.textContent = elapsedDays > 0 ? `Day ${elapsedDays}` : 'Not started';
-		}
-		const track = document.querySelector('.progress-bar-inner');
-		if (track) {
-			track.setAttribute('role', 'progressbar');
-			track.setAttribute('aria-valuenow', String(pct));
-			track.setAttribute('aria-valuemin', '0');
-			track.setAttribute('aria-valuemax', '100');
-		}
-	}
 
 	// Fit big number to container (~85% width)
 	function autosizeDays() {
