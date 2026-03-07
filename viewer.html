@@ -21,7 +21,18 @@
       <div class="days-wrap">
         <div class="days" id="daysCount">0</div>
       </div>
-      <div class="quote" id="quote"></div>
+      <div class="quote" id="quote" role="button" tabindex="0" title="Tap for a new quote" aria-label="Daily quote — tap for a new one"></div>
+      <div class="quote-hint" id="quoteHint" aria-hidden="true">✨ tap for a new quote</div>
+    </div>
+    <div class="progress-bar-wrap" aria-label="Journey progress">
+      <div class="progress-bar-inner">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-bar-label">
+        <span id="progressLabel">Day 1</span>
+        <span id="progressPct">0%</span>
+        <span>🎯 Apr 1, 2028</span>
+      </div>
     </div>
     <div class="effects" id="effects" aria-hidden="true"></div>
     <div class="lights" id="lights" aria-hidden="true"></div>

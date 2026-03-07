@@ -19,8 +19,13 @@
 	let holidaySet = new Set();
 	let holidayMap = new Map(); // date -> { name, theme }
 	let quotesByDate = {};
+	let allQuotes = [];
+	let currentQuoteIdx = -1;
 	let lastThemeKey = null;
 	let lastDaypart = null;
+
+	// Progress start reference (Oct 20, 2025)
+	const PROGRESS_START = { y: 2025, m: 9, d: 20 };
 
 	// IST utilities
 	function nowInIST() {
@@ -97,6 +102,17 @@
 			return quotesMap[dstr];
 		return quoteOfTheDay(today, fallbackQuotes);
 	}
+	function initQuoteIndex(today) {
+		if (currentQuoteIdx === -1) {
+			const base = Math.floor(Date.UTC(today.y, today.m, today.d) / 86400000);
+			currentQuoteIdx = Math.abs(base) % (allQuotes.length || 1);
+		}
+	}
+	function cycleQuote() {
+		if (!allQuotes.length) return;
+		currentQuoteIdx = (currentQuoteIdx + 1) % allQuotes.length;
+		elQuote.textContent = allQuotes[currentQuoteIdx];
+	}
 
 	// Query handling
 	function getQuery() {
@@ -169,7 +185,17 @@
 		updateEffects(themeKey, daypart);
 
 		// Quote
-		elQuote.textContent = quoteForDate(today, quotesByDate, config.quotes);
+		const dstr = fmtYMD(today.y, today.m, today.d);
+		const hasDateQuote = quotesByDate && Object.prototype.hasOwnProperty.call(quotesByDate, dstr);
+		if (hasDateQuote) {
+			elQuote.textContent = quotesByDate[dstr];
+		} else {
+			initQuoteIndex(today);
+			elQuote.textContent = allQuotes[currentQuoteIdx] || '';
+		}
+
+		// Progress bar
+		updateProgress(days, target);
 
 		// Fit number
 		autosizeDays();
@@ -199,14 +225,43 @@
 			(config.holidays || []).map((h) => [h.date, { name: h.name, theme: h.theme }])
 		);
 		quotesByDate = config.quotesByDate || {};
+		allQuotes = config.quotes || [];
 		recompute();
 		setInterval(recompute, 30_000);
 		window.addEventListener('resize', autosizeDays);
+
+		// Quote cycling on tap/click/keyboard
+		if (elQuote) {
+			elQuote.addEventListener('click', cycleQuote);
+			elQuote.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cycleQuote(); }
+			});
+		}
 	}
 	boot().catch((err) => {
 		console.error('Boot error:', err);
 		elStatus.textContent = 'Failed to load configuration';
 	});
+
+	// Progress bar
+	function updateProgress(remainingDays, target) {
+		const elFill = document.getElementById('progressFill');
+		const elPct = document.getElementById('progressPct');
+		const elLabel = document.getElementById('progressLabel');
+		if (!elFill || !elPct) return;
+		const totalDays = computeBusinessDays(PROGRESS_START, target);
+		const elapsedDays = Math.max(0, totalDays - remainingDays);
+		const pct = totalDays > 0
+			? Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)))
+			: 0;
+		elFill.style.width = pct + '%';
+		elPct.textContent = pct + '%';
+		if (elLabel) {
+			elLabel.textContent = elapsedDays > 0 ? `Day ${elapsedDays}` : 'Not started';
+		}
+		const track = document.querySelector('.progress-bar-inner');
+		if (track) track.setAttribute('aria-valuenow', String(pct));
+	}
 
 	// Fit big number to container (~85% width)
 	function autosizeDays() {

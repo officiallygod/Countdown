@@ -273,7 +273,7 @@
 		const todayMs = Date.UTC(today.y, today.m, today.d);
 
 		const totalDays = computeBusinessDays(PROGRESS_START, target, holidaySet);
-		const elapsedDays = totalDays - remainingDays;
+		const elapsedDays = Math.max(0, totalDays - remainingDays);
 		const pct = totalDays > 0 ? Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100))) : 0;
 
 		$bar.style.width = pct + '%';
@@ -282,7 +282,7 @@
 			$track.setAttribute('aria-valuenow', String(pct));
 		}
 		if ($elapsed) {
-			$elapsed.textContent = `Day ${Math.max(1, elapsedDays)}`;
+			$elapsed.textContent = elapsedDays > 0 ? `Day ${elapsedDays}` : 'Not started';
 		}
 	}
 
