@@ -211,8 +211,15 @@
 
 		// Quote — only set on first recompute; subsequent changes are user-driven
 		if (currentQuoteIdx === -1) {
-			showQuote(quoteForDate(today, quotesByDate, allQuotes));
-			initQuoteIndex(today);
+			const dstr = fmtYMD(today.y, today.m, today.d);
+			if (quotesByDate && Object.prototype.hasOwnProperty.call(quotesByDate, dstr)) {
+				// Date-specific quote: show it; cycling starts from index 0 on first tap
+				showQuote(quotesByDate[dstr]);
+			} else {
+				// Deterministic daily quote: set index so cycling continues from here
+				initQuoteIndex(today);
+				showQuote(allQuotes[currentQuoteIdx] || '');
+			}
 		}
 
 		// Progress bar
