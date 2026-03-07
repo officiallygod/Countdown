@@ -129,40 +129,6 @@ body {
   filter: brightness(0.98);
 }
 
-/* Fancy daypart buttons */
-.btn {
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #fff;
-  color: #333;
-  cursor: pointer;
-}
-
-.btn:hover {
-  filter: brightness(0.98);
-}
-
-.btn.morning {
-  background: #fff7e6;
-  color: #7a5a00;
-}
-
-.btn.noon {
-  background: #fffbe6;
-  color: #7a6a00;
-}
-
-.btn.evening {
-  background: #ffe6f2;
-  color: #7a2a50;
-}
-
-.btn.night {
-  background: #eef2ff;
-  color: #2a3a7a;
-}
-
 .holiday-list {
   list-style: none;
   padding: 0;
