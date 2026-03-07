@@ -76,7 +76,7 @@
         <button type="button" onclick="window.open('viewer.html?preview=christmas','_blank')">Preview Christmas</button>
         <button type="button" onclick="window.open('viewer.html?preview=newyear','_blank')">Preview New Year</button>
       </div>
-      <div class="holiday-form">
+      <div class="holiday-form" style="margin-top:8px; flex-wrap: wrap; gap: 8px;">
         <label>
           Custom Date (IST)
           <input type="date" id="previewDate" />
@@ -84,16 +84,6 @@
         <button type="button"
           onclick="(function(){var d=document.getElementById('previewDate').value; if(d){window.open('viewer.html?today='+d,'_blank');}})()">Preview
           Custom Date</button>
-      </div>
-      <div class="holiday-form" style="margin-top:8px; flex-wrap: wrap; gap: 8px;">
-        <span class="help" style="min-width:160px">Time of day (IST):</span>
-        <button type="button" class="btn morning"
-          onclick="window.open('viewer.html?daypart=morning','_blank')">Morning</button>
-        <button type="button" class="btn noon" onclick="window.open('viewer.html?daypart=noon','_blank')">Noon</button>
-        <button type="button" class="btn evening"
-          onclick="window.open('viewer.html?daypart=evening','_blank')">Evening</button>
-        <button type="button" class="btn night"
-          onclick="window.open('viewer.html?daypart=night','_blank')">Night</button>
       </div>
     </section>
 

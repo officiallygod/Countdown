@@ -1,5 +1,6 @@
 // Fullscreen viewer: business-days countdown to target, IST-aware
 // - Loads config + themes (with embedded fallbacks in viewer.html)
+// - Merges config holidays with localStorage custom holidays (matches main page)
 // - Excludes Sundays and holidays; pauses on excluded days
 // - Uses Effects (assets/js/effects.js) for visuals
 
@@ -22,7 +23,6 @@
 	let allQuotes = [];
 	let currentQuoteIdx = -1;
 	let lastThemeKey = null;
-	let lastDaypart = null;
 
 	// Progress start reference (Oct 20, 2025)
 	const PROGRESS_START = { y: 2025, m: 9, d: 20 };
@@ -36,8 +36,6 @@
 			y: ist.getUTCFullYear(),
 			m: ist.getUTCMonth(),
 			d: ist.getUTCDate(),
-			h: ist.getUTCHours(),
-			toDate: () => ist,
 		};
 	}
 	function fmtYMD(y, m, d) {
@@ -53,6 +51,19 @@
 	}
 	function isHoliday(ymd) {
 		return holidaySet.has(fmtYMD(ymd.y, ymd.m, ymd.d));
+	}
+
+	// Load custom holidays from localStorage (mirrors main.js)
+	function loadLocalHolidays() {
+		try {
+			const raw = localStorage.getItem('customHolidays');
+			if (!raw) return [];
+			const parsed = JSON.parse(raw);
+			if (!Array.isArray(parsed)) return [];
+			return parsed.filter((x) => x && typeof x.date === 'string');
+		} catch {
+			return [];
+		}
 	}
 
 	// Business-day count (inclusive; excludes Sundays and holidays)
@@ -96,22 +107,24 @@
 		const idx = Math.abs(base) % quotes.length;
 		return quotes[idx];
 	}
-	function quoteForDate(today, quotesMap, fallbackQuotes) {
-		const dstr = fmtYMD(today.y, today.m, today.d);
-		if (quotesMap && Object.prototype.hasOwnProperty.call(quotesMap, dstr))
-			return quotesMap[dstr];
-		return quoteOfTheDay(today, fallbackQuotes);
-	}
 	function initQuoteIndex(today) {
 		if (currentQuoteIdx === -1) {
 			const base = Math.floor(Date.UTC(today.y, today.m, today.d) / 86400000);
 			currentQuoteIdx = Math.abs(base) % (allQuotes.length || 1);
 		}
 	}
+	function showQuote(text) {
+		if (!elQuote) return;
+		elQuote.classList.remove('quote-fade');
+		// Trigger reflow to restart animation
+		void elQuote.offsetWidth;
+		elQuote.classList.add('quote-fade');
+		elQuote.textContent = text;
+	}
 	function cycleQuote() {
 		if (!allQuotes.length) return;
 		currentQuoteIdx = (currentQuoteIdx + 1) % allQuotes.length;
-		elQuote.textContent = allQuotes[currentQuoteIdx];
+		showQuote(allQuotes[currentQuoteIdx]);
 	}
 
 	// Query handling
@@ -119,8 +132,7 @@
 		const q = new URLSearchParams(location.search);
 		const today = q.get('today');
 		const preview = q.get('preview'); // sunday | diwali | karnataka | christmas | newyear
-		const daypart = q.get('daypart'); // morning | noon | evening | night (testing)
-		return { today, preview, daypart };
+		return { today, preview };
 	}
 	function parseYMD(str) {
 		const m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(str || '');
@@ -128,10 +140,20 @@
 		return { y: +m[1], m: +m[2] - 1, d: +m[3] };
 	}
 
-	// Main recompute
+	// Main recompute — also refreshes localStorage holidays on each tick
 	function recompute() {
 		if (!config) return;
-		const { today: qToday, preview, daypart: qPart } = getQuery();
+
+		// Rebuild holiday sets each tick so localStorage additions are reflected
+		holidaySet = new Set((config.holidays || []).map((h) => h.date));
+		holidayMap = new Map(
+			(config.holidays || []).map((h) => [h.date, { name: h.name, theme: h.theme }])
+		);
+		for (const h of loadLocalHolidays()) {
+			holidaySet.add(h.date);
+		}
+
+		const { today: qToday, preview } = getQuery();
 		const today = qToday ? parseYMD(qToday) || nowInIST() : nowInIST();
 		const [ty, tm, td] = config.target.split('-').map(Number);
 		const target = { y: ty, m: tm - 1, d: td };
@@ -175,23 +197,20 @@
 				? names.sunday
 				: `Holiday: ${names[themeKey] || 'Holiday'}`;
 
-		// Daypart visuals
-		const istNow = nowInIST();
-		const daypart =
-			qPart && ['morning', 'noon', 'evening', 'night'].includes(qPart)
-				? qPart
-				: getDaypart(istNow.h);
-		updateDaypart(daypart);
-		updateEffects(themeKey, daypart);
+		// Effects
+		updateEffects(themeKey);
 
-		// Quote
-		const dstr = fmtYMD(today.y, today.m, today.d);
-		const hasDateQuote = quotesByDate && Object.prototype.hasOwnProperty.call(quotesByDate, dstr);
-		if (hasDateQuote) {
-			elQuote.textContent = quotesByDate[dstr];
-		} else {
-			initQuoteIndex(today);
-			elQuote.textContent = allQuotes[currentQuoteIdx] || '';
+		// Quote — only set on first call; cycling is user-driven
+		if (currentQuoteIdx === -1) {
+			const dstr = fmtYMD(today.y, today.m, today.d);
+			const hasDateQuote =
+				quotesByDate && Object.prototype.hasOwnProperty.call(quotesByDate, dstr);
+			if (hasDateQuote) {
+				showQuote(quotesByDate[dstr]);
+			} else {
+				initQuoteIndex(today);
+				showQuote(allQuotes[currentQuoteIdx] || '');
+			}
 		}
 
 		// Progress bar
@@ -220,10 +239,6 @@
 			loadJSON('../data/config.json', 'default-config'),
 			loadJSON('../data/themes.json', 'default-themes'),
 		]);
-		holidaySet = new Set((config.holidays || []).map((h) => h.date));
-		holidayMap = new Map(
-			(config.holidays || []).map((h) => [h.date, { name: h.name, theme: h.theme }])
-		);
 		quotesByDate = config.quotesByDate || {};
 		allQuotes = config.quotes || [];
 		recompute();
@@ -234,7 +249,10 @@
 		if (elQuote) {
 			elQuote.addEventListener('click', cycleQuote);
 			elQuote.addEventListener('keydown', (e) => {
-				if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cycleQuote(); }
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					cycleQuote();
+				}
 			});
 		}
 	}
@@ -251,16 +269,22 @@
 		if (!elFill || !elPct) return;
 		const totalDays = computeBusinessDays(PROGRESS_START, target);
 		const elapsedDays = Math.max(0, totalDays - remainingDays);
-		const pct = totalDays > 0
-			? Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)))
-			: 0;
+		const pct =
+			totalDays > 0
+				? Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)))
+				: 0;
 		elFill.style.width = pct + '%';
 		elPct.textContent = pct + '%';
 		if (elLabel) {
 			elLabel.textContent = elapsedDays > 0 ? `Day ${elapsedDays}` : 'Not started';
 		}
 		const track = document.querySelector('.progress-bar-inner');
-		if (track) track.setAttribute('aria-valuenow', String(pct));
+		if (track) {
+			track.setAttribute('role', 'progressbar');
+			track.setAttribute('aria-valuenow', String(pct));
+			track.setAttribute('aria-valuemin', '0');
+			track.setAttribute('aria-valuemax', '100');
+		}
 	}
 
 	// Fit big number to container (~85% width)
@@ -274,10 +298,7 @@
 		if (!meas) {
 			meas = document.createElement('span');
 			meas.id = 'measure-days';
-			meas.style.position = 'absolute';
-			meas.style.left = '-9999px';
-			meas.style.top = '0';
-			meas.style.whiteSpace = 'nowrap';
+			meas.style.cssText = 'position:absolute;left:-9999px;top:0;white-space:nowrap';
 			meas.style.fontFamily = getComputedStyle(elDays).fontFamily;
 			meas.style.fontWeight = getComputedStyle(elDays).fontWeight;
 			document.body.appendChild(meas);
@@ -294,32 +315,17 @@
 	}
 
 	// Effects wiring (use global Effects from assets/js/effects.js)
-	function clearEffects() {
-		if (elEffects) elEffects.innerHTML = '';
-	}
-	function updateEffects(themeKey, daypart) {
+	function updateEffects(themeKey) {
 		if (!elEffects || !window.Effects) return;
-		if (lastThemeKey === themeKey && lastDaypart === daypart) return;
+		if (lastThemeKey === themeKey) return;
 		lastThemeKey = themeKey;
-		lastDaypart = daypart;
-		clearEffects();
+		elEffects.innerHTML = '';
 		if (elLights) elLights.innerHTML = '';
 		if (themeKey === 'christmas') Effects.buildSnow(elEffects, 60);
 		else if (themeKey === 'newyear') Effects.buildConfetti(elEffects, 120);
 		else if (themeKey === 'karnataka') Effects.buildPetals(elEffects, 48);
 		else if (themeKey === 'diwali') Effects.buildLights(elLights, 24);
-		if (themeKey === 'base') Effects.buildDaypartSprites(elEffects, daypart, 6);
-		else if (themeKey === 'sunday') Effects.buildDaypartSprites(elEffects, daypart, 10);
-	}
-
-	// Daypart helpers
-	function getDaypart(h) {
-		if (h >= 19 || h < 6) return 'night';
-		if (h < 11) return 'morning';
-		if (h < 16) return 'noon';
-		return 'evening';
-	}
-	function updateDaypart(dp) {
-		if (document.body.dataset.daypart !== dp) document.body.dataset.daypart = dp;
 	}
 })();
+
+
