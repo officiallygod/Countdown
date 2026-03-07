@@ -9,7 +9,7 @@
   --accent-2: #ffd6e8;
 }
 
-/* Themes now set via data-theme attribute + CSS variables from JS */
+/* Themes set via CSS variables from JS */
 
 * {
   box-sizing: border-box;
@@ -24,8 +24,9 @@ body {
   margin: 0;
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
   color: var(--ink);
-  background: linear-gradient(145deg, var(--bg-1), var(--bg-2));
+  background: linear-gradient(145deg, var(--bg-1) 0%, var(--bg-2) 100%);
   overflow-x: hidden;
+  transition: background 0.6s ease;
 }
 
 .stage {
@@ -36,42 +37,12 @@ body {
   position: relative;
 }
 
-.stage::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0;
-  transition: opacity .4s ease;
-}
-
-[data-daypart="morning"] .stage::before {
-  background: radial-gradient(120% 80% at 50% 0%, rgba(255, 227, 186, .18), rgba(255, 227, 186, 0));
-  opacity: 1;
-}
-
-[data-daypart="noon"] .stage::before {
-  background: radial-gradient(120% 80% at 50% 0%, rgba(255, 243, 205, .12), rgba(255, 243, 205, 0));
-  opacity: 1;
-}
-
-[data-daypart="evening"] .stage::before {
-  background: radial-gradient(120% 80% at 50% 0%, rgba(248, 200, 255, .14), rgba(248, 200, 255, 0));
-  opacity: 1;
-}
-
-[data-daypart="night"] .stage::before {
-  background: rgba(0, 0, 0, .48);
-  opacity: 1;
-}
-
 .center {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.2vh;
+  gap: 2vh;
   position: relative;
   z-index: 3;
 }
@@ -79,7 +50,9 @@ body {
 .status {
   color: var(--muted);
   font-weight: 600;
-  margin-bottom: 8px;
+  font-size: clamp(14px, 1.6vw, 20px);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .days-wrap {
@@ -88,7 +61,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: min(60vh, 85vw);
+  height: min(62vh, 88vw);
 }
 
 .days {
@@ -98,32 +71,30 @@ body {
   /* JS will resize */
   font-weight: 900;
   line-height: 1;
-  background-image: linear-gradient(45deg, var(--accent-1), var(--accent-2));
+  background-image: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   white-space: nowrap;
-  letter-spacing: -0.02em;
-  will-change: font-size, letter-spacing;
+  letter-spacing: -0.03em;
+  will-change: font-size;
+  filter: drop-shadow(0 4px 24px rgba(0,0,0,0.07));
 }
 
 .quote {
-  margin-top: 16px;
-  font-size: clamp(16px, 2.2vw, 28px);
-  color: #3b4758;
-  opacity: 0.9;
-  padding: 0 16px;
-  max-width: 900px;
+  margin-top: 8px;
+  font-size: clamp(15px, 2vw, 26px);
+  color: var(--ink);
+  opacity: 0.7;
+  padding: 0 20px;
+  max-width: 860px;
   font-family: 'Nunito Sans', 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-style: normal;
-  line-height: 1.4;
+  line-height: 1.5;
   word-break: break-word;
   hyphens: auto;
 }
 
-/* removed time display */
-
-/* Holiday decorative badges/overlays */
+/* Holiday decorative badges */
 .badge {
   position: fixed;
   top: 12px;
@@ -155,7 +126,7 @@ body {
   animation: float 6s ease-in-out infinite;
 }
 
-/* Christmas decorations (Santa + trees) */
+/* Christmas decorations */
 [data-theme="christmas"] .badge::after {
   content: "🎅 🎄 🎄";
   font-size: 24px;
@@ -257,13 +228,10 @@ body {
 }
 
 @keyframes flicker {
-
-  0%,
-  100% {
+  0%, 100% {
     filter: drop-shadow(0 0 10px rgba(255, 170, 0, .6)) brightness(1);
     transform: translateY(10px) scale(1);
   }
-
   50% {
     filter: drop-shadow(0 0 16px rgba(255, 190, 60, .9)) brightness(1.05);
     transform: translateY(10px) scale(1.03);
@@ -271,29 +239,13 @@ body {
 }
 
 @keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-6px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
 @keyframes twinkle {
-
-  0%,
-  100% {
-    opacity: .6;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.15);
-  }
+  0%, 100% { opacity: .6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
 }
 
 /* Snow, confetti, petals */
@@ -311,40 +263,8 @@ body {
 }
 
 @keyframes snow-fall {
-  0% {
-    transform: translateY(0) translateX(0);
-  }
-
-  100% {
-    transform: translateY(120vh) translateX(var(--drift, 20px));
-  }
-}
-
-/* Daypart sprites (SVG) */
-.sprite,
-.emoji {
-  position: absolute;
-  pointer-events: none;
-  transform: translateY(0);
-  animation: float-slow var(--dur, 9s) ease-in-out infinite;
-}
-
-.sprite {
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-}
-
-@keyframes float-slow {
-
-  0%,
-  100% {
-    transform: translateY(0) translateX(0);
-  }
-
-  50% {
-    transform: translateY(6px) translateX(2px);
-  }
+  0% { transform: translateY(0) translateX(0); }
+  100% { transform: translateY(120vh) translateX(var(--drift, 20px)); }
 }
 
 .confetti {
@@ -362,13 +282,8 @@ body {
 }
 
 @keyframes confetti-fall {
-  0% {
-    transform: translateY(0) rotate(var(--rot, 0deg));
-  }
-
-  100% {
-    transform: translateY(120vh) rotate(calc(var(--rot, 0deg) + 360deg));
-  }
+  0% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  100% { transform: translateY(120vh) rotate(calc(var(--rot, 0deg) + 360deg)); }
 }
 
 .petal {
@@ -386,13 +301,8 @@ body {
 }
 
 @keyframes petal-fall {
-  0% {
-    transform: translateY(0) translateX(0) rotate(var(--rot, 0deg));
-  }
-
-  100% {
-    transform: translateY(120vh) translateX(var(--drift, 30px)) rotate(calc(var(--rot, 0deg) + 60deg));
-  }
+  0% { transform: translateY(0) translateX(0) rotate(var(--rot, 0deg)); }
+  100% { transform: translateY(120vh) translateX(var(--drift, 30px)) rotate(calc(var(--rot, 0deg) + 60deg)); }
 }
 
 /* Diwali lights garland */
@@ -438,71 +348,25 @@ body {
 }
 
 @keyframes blink {
-
-  0%,
-  100% {
-    filter: brightness(1) saturate(1);
-    opacity: .7;
-  }
-
-  50% {
-    filter: brightness(1.3) saturate(1.2);
-    opacity: 1;
-  }
+  0%, 100% { filter: brightness(1) saturate(1); opacity: .7; }
+  50% { filter: brightness(1.3) saturate(1.2); opacity: 1; }
 }
 
-/* responsive tweaks */
+/* Responsive tweaks */
 @media (min-width: 1024px) {
-  .center {
-    gap: 1.6vh;
-  }
-
-  .quote {
-    margin-top: 8px;
-    max-width: 800px;
-  }
-
-  .days-wrap {
-    height: min(50vh, 70vw);
-  }
+  .center { gap: 1.6vh; }
+  .quote { margin-top: 6px; max-width: 800px; }
+  .days-wrap { height: min(52vh, 72vw); }
 }
 
 @media (max-width: 480px) {
-  [data-theme="karnataka"] .badge::before {
-    width: 44px;
-    height: 30px;
-  }
-
-  [data-theme="diwali"] .badge::after {
-    font-size: 20px;
-  }
-
-  [data-theme="christmas"] .badge::after {
-    font-size: 18px;
-  }
-
-  [data-theme="newyear"] .badge::after {
-    font-size: 18px;
-  }
-
-  .diya {
-    width: 72px;
-  }
-
-  .candle {
-    width: 48px;
-  }
-
-  .santa {
-    width: 70px;
-  }
-
-  .tree {
-    width: 76px;
-  }
-
-  .fireworks,
-  .fireworks.f2 {
-    width: 72px;
-  }
+  [data-theme="karnataka"] .badge::before { width: 44px; height: 30px; }
+  [data-theme="diwali"] .badge::after { font-size: 20px; }
+  [data-theme="christmas"] .badge::after { font-size: 18px; }
+  [data-theme="newyear"] .badge::after { font-size: 18px; }
+  .diya { width: 72px; }
+  .candle { width: 48px; }
+  .santa { width: 70px; }
+  .tree { width: 76px; }
+  .fireworks, .fireworks.f2 { width: 72px; }
 }

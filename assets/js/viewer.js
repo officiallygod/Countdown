@@ -1,5 +1,6 @@
 // Fullscreen viewer: business-days countdown to target, IST-aware
 // - Loads config + themes (with embedded fallbacks in viewer.html)
+// - Merges config holidays with localStorage custom holidays (matches main page)
 // - Excludes Sundays and holidays; pauses on excluded days
 // - Uses Effects (assets/js/effects.js) for visuals
 
@@ -20,7 +21,6 @@
 	let holidayMap = new Map(); // date -> { name, theme }
 	let quotesByDate = {};
 	let lastThemeKey = null;
-	let lastDaypart = null;
 
 	// IST utilities
 	function nowInIST() {
@@ -31,8 +31,6 @@
 			y: ist.getUTCFullYear(),
 			m: ist.getUTCMonth(),
 			d: ist.getUTCDate(),
-			h: ist.getUTCHours(),
-			toDate: () => ist,
 		};
 	}
 	function fmtYMD(y, m, d) {
@@ -48,6 +46,19 @@
 	}
 	function isHoliday(ymd) {
 		return holidaySet.has(fmtYMD(ymd.y, ymd.m, ymd.d));
+	}
+
+	// Load custom holidays from localStorage (mirrors main.js)
+	function loadLocalHolidays() {
+		try {
+			const raw = localStorage.getItem('customHolidays');
+			if (!raw) return [];
+			const parsed = JSON.parse(raw);
+			if (!Array.isArray(parsed)) return [];
+			return parsed.filter((x) => x && typeof x.date === 'string');
+		} catch {
+			return [];
+		}
 	}
 
 	// Business-day count (inclusive; excludes Sundays and holidays)
@@ -103,8 +114,7 @@
 		const q = new URLSearchParams(location.search);
 		const today = q.get('today');
 		const preview = q.get('preview'); // sunday | diwali | karnataka | christmas | newyear
-		const daypart = q.get('daypart'); // morning | noon | evening | night (testing)
-		return { today, preview, daypart };
+		return { today, preview };
 	}
 	function parseYMD(str) {
 		const m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(str || '');
@@ -112,10 +122,20 @@
 		return { y: +m[1], m: +m[2] - 1, d: +m[3] };
 	}
 
-	// Main recompute
+	// Main recompute — also refreshes localStorage holidays on each tick
 	function recompute() {
 		if (!config) return;
-		const { today: qToday, preview, daypart: qPart } = getQuery();
+
+		// Rebuild holiday sets each tick so localStorage additions are reflected
+		holidaySet = new Set((config.holidays || []).map((h) => h.date));
+		holidayMap = new Map(
+			(config.holidays || []).map((h) => [h.date, { name: h.name, theme: h.theme }])
+		);
+		for (const h of loadLocalHolidays()) {
+			holidaySet.add(h.date);
+		}
+
+		const { today: qToday, preview } = getQuery();
 		const today = qToday ? parseYMD(qToday) || nowInIST() : nowInIST();
 		const [ty, tm, td] = config.target.split('-').map(Number);
 		const target = { y: ty, m: tm - 1, d: td };
@@ -159,14 +179,8 @@
 				? names.sunday
 				: `Holiday: ${names[themeKey] || 'Holiday'}`;
 
-		// Daypart visuals
-		const istNow = nowInIST();
-		const daypart =
-			qPart && ['morning', 'noon', 'evening', 'night'].includes(qPart)
-				? qPart
-				: getDaypart(istNow.h);
-		updateDaypart(daypart);
-		updateEffects(themeKey, daypart);
+		// Effects
+		updateEffects(themeKey);
 
 		// Quote
 		elQuote.textContent = quoteForDate(today, quotesByDate, config.quotes);
@@ -194,10 +208,6 @@
 			loadJSON('../data/config.json', 'default-config'),
 			loadJSON('../data/themes.json', 'default-themes'),
 		]);
-		holidaySet = new Set((config.holidays || []).map((h) => h.date));
-		holidayMap = new Map(
-			(config.holidays || []).map((h) => [h.date, { name: h.name, theme: h.theme }])
-		);
 		quotesByDate = config.quotesByDate || {};
 		recompute();
 		setInterval(recompute, 30_000);
@@ -219,10 +229,7 @@
 		if (!meas) {
 			meas = document.createElement('span');
 			meas.id = 'measure-days';
-			meas.style.position = 'absolute';
-			meas.style.left = '-9999px';
-			meas.style.top = '0';
-			meas.style.whiteSpace = 'nowrap';
+			meas.style.cssText = 'position: absolute; left: -9999px; top: 0; white-space: nowrap';
 			meas.style.fontFamily = getComputedStyle(elDays).fontFamily;
 			meas.style.fontWeight = getComputedStyle(elDays).fontWeight;
 			document.body.appendChild(meas);
@@ -239,32 +246,15 @@
 	}
 
 	// Effects wiring (use global Effects from assets/js/effects.js)
-	function clearEffects() {
-		if (elEffects) elEffects.innerHTML = '';
-	}
-	function updateEffects(themeKey, daypart) {
+	function updateEffects(themeKey) {
 		if (!elEffects || !window.Effects) return;
-		if (lastThemeKey === themeKey && lastDaypart === daypart) return;
+		if (lastThemeKey === themeKey) return;
 		lastThemeKey = themeKey;
-		lastDaypart = daypart;
-		clearEffects();
+		elEffects.innerHTML = '';
 		if (elLights) elLights.innerHTML = '';
 		if (themeKey === 'christmas') Effects.buildSnow(elEffects, 60);
 		else if (themeKey === 'newyear') Effects.buildConfetti(elEffects, 120);
 		else if (themeKey === 'karnataka') Effects.buildPetals(elEffects, 48);
 		else if (themeKey === 'diwali') Effects.buildLights(elLights, 24);
-		if (themeKey === 'base') Effects.buildDaypartSprites(elEffects, daypart, 6);
-		else if (themeKey === 'sunday') Effects.buildDaypartSprites(elEffects, daypart, 10);
-	}
-
-	// Daypart helpers
-	function getDaypart(h) {
-		if (h >= 19 || h < 6) return 'night';
-		if (h < 11) return 'morning';
-		if (h < 16) return 'noon';
-		return 'evening';
-	}
-	function updateDaypart(dp) {
-		if (document.body.dataset.daypart !== dp) document.body.dataset.daypart = dp;
 	}
 })();
