@@ -7,6 +7,8 @@
   --muted: #64748b;
   --accent-1: #96d1c7;
   --accent-2: #ffd6e8;
+  --panel-bg: rgba(255, 255, 255, 0.65);
+  --panel-border: rgba(0, 0, 0, 0.08);
 }
 
 /* Themes set via CSS variables from JS */
@@ -35,6 +37,34 @@ body {
   place-items: center;
   padding: 24px;
   position: relative;
+}
+
+.mode-toggle {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 5;
+  transition: transform 0.15s ease, backdrop-filter 0.15s ease;
+  backdrop-filter: blur(8px);
+}
+
+.mode-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.mode-toggle:active {
+  transform: translateY(0);
 }
 
 .center {
