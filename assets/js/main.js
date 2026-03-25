@@ -4,6 +4,7 @@
 (function () {
 	let TARGET = { y: 2028, m: 3, d: 1 }; // Overridden by config when available
 	const IST_OFFSET_MIN = 5 * 60 + 30; // +330
+	const MODE_KEY = 'countdown-mode';
 
 	const $days = document.getElementById('daysCount');
 	const $status = document.getElementById('status');
@@ -13,6 +14,9 @@
 	const $label = document.getElementById('holidayLabel');
 	const $list = document.getElementById('holidayList');
 	const $clear = document.getElementById('clearHolidays');
+	const $modeToggle = document.getElementById('modeToggle');
+	const $modeIcon = document.getElementById('modeIcon');
+	const $modeLabel = document.getElementById('modeLabel');
 
 	// Utilities for IST dates
 	function nowInIST() {
@@ -261,6 +265,60 @@
 	// Reference start: earliest quotesByDate or the first configured holiday, whichever is earlier
 	const PROGRESS_START = { y: 2025, m: 9, d: 20 }; // 2025-10-20 (0-based month)
 
+	function getStoredMode() {
+		const stored = localStorage.getItem(MODE_KEY);
+		return stored === 'dark' || stored === 'light' ? stored : null;
+	}
+
+	function currentMode() {
+		const stored = getStoredMode();
+		if (stored) return stored;
+		const prefersDark =
+			typeof window.matchMedia === 'function' &&
+			window.matchMedia('(prefers-color-scheme: dark)').matches;
+		return prefersDark ? 'dark' : 'light';
+	}
+
+	function updateModeToggle(mode) {
+		if (!$modeToggle) return;
+		const isDark = mode === 'dark';
+		$modeToggle.setAttribute('aria-pressed', String(isDark));
+		if ($modeIcon) $modeIcon.textContent = isDark ? '☀️' : '🌙';
+		if ($modeLabel) $modeLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
+	}
+
+	function applyMode(mode, opts = {}) {
+		const next = mode === 'dark' ? 'dark' : 'light';
+		document.documentElement.dataset.mode = next;
+		if (!opts.skipSave) {
+			localStorage.setItem(MODE_KEY, next);
+		}
+		updateModeToggle(next);
+	}
+
+	function setupModeListeners() {
+		const stored = getStoredMode();
+		const initial = stored || currentMode();
+		applyMode(initial, { skipSave: !stored });
+		if ($modeToggle) {
+			$modeToggle.addEventListener('click', () => {
+				const next = currentMode() === 'dark' ? 'light' : 'dark';
+				applyMode(next);
+				recompute();
+			});
+		}
+		if (typeof window.matchMedia === 'function') {
+			const mq = window.matchMedia('(prefers-color-scheme: dark)');
+			if (mq && typeof mq.addEventListener === 'function') {
+				mq.addEventListener('change', (e) => {
+					if (getStoredMode()) return;
+					applyMode(e.matches ? 'dark' : 'light', { skipSave: true });
+					recompute();
+				});
+			}
+		}
+	}
+
 	function updateProgress(remainingDays, today, target, holidaySet) {
 		const $bar = document.getElementById('progressBar');
 		const $pct = document.getElementById('progressPct');
@@ -295,6 +353,7 @@
 
 	// Initial render
 	(async function init() {
+		setupModeListeners();
 		await loadConfig();
 		renderHolidays(loadHolidays());
 		recompute();

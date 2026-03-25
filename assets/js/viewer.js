@@ -6,6 +6,7 @@
 
 (function () {
 	const IST_OFFSET_MIN = 5 * 60 + 30; // +05:30
+	const MODE_KEY = 'countdown-mode';
 
 	// DOM
 	const elDays = document.getElementById('daysCount');
@@ -13,6 +14,9 @@
 	const elQuote = document.getElementById('quote');
 	const elEffects = document.getElementById('effects');
 	const elLights = document.getElementById('lights');
+	const elModeToggle = document.getElementById('viewerModeToggle');
+	const elModeIcon = document.getElementById('viewerModeIcon');
+	const elModeLabel = document.getElementById('viewerModeLabel');
 
 	// State
 	let config = null;
@@ -25,6 +29,32 @@
 	// Quote cycling state
 	let allQuotes = [];
 	let currentQuoteIdx = -1;
+
+	const DARK_OVERRIDES = {
+		default: {
+			'--bg-1': '#0f172a',
+			'--bg-2': '#111827',
+			'--ink': '#e2e8f0',
+			'--muted': '#cbd5e1',
+			'--panel-bg': 'rgba(15, 23, 42, 0.78)',
+			'--panel-border': 'rgba(255, 255, 255, 0.12)',
+		},
+		base: {
+			'--bg-1': '#0f172a',
+			'--bg-2': '#111827',
+			'--ink': '#e2e8f0',
+			'--muted': '#cbd5e1',
+			'--panel-bg': 'rgba(15, 23, 42, 0.78)',
+			'--panel-border': 'rgba(255, 255, 255, 0.12)',
+			'--accent-1': '#38bdf8',
+			'--accent-2': '#a78bfa',
+		},
+		sunday: { '--bg-1': '#1d1120', '--bg-2': '#271525' },
+		diwali: { '--bg-1': '#1c1608', '--bg-2': '#2a1d10' },
+		karnataka: { '--bg-1': '#1f1610', '--bg-2': '#2a1412' },
+		christmas: { '--bg-1': '#152026', '--bg-2': '#0f172a' },
+		newyear: { '--bg-1': '#141825', '--bg-2': '#0f1221' },
+	};
 
 	// IST utilities
 	function nowInIST() {
@@ -65,6 +95,63 @@
 		}
 	}
 
+	function getStoredMode() {
+		const stored = localStorage.getItem(MODE_KEY);
+		return stored === 'dark' || stored === 'light' ? stored : null;
+	}
+
+	function currentMode() {
+		const stored = getStoredMode();
+		if (stored) return stored;
+		const prefersDark =
+			typeof window.matchMedia === 'function' &&
+			window.matchMedia('(prefers-color-scheme: dark)').matches;
+		return prefersDark ? 'dark' : 'light';
+	}
+
+	function updateModeToggle(mode) {
+		if (!elModeToggle) return;
+		const isDark = mode === 'dark';
+		elModeToggle.setAttribute('aria-pressed', String(isDark));
+		if (elModeIcon) elModeIcon.textContent = isDark ? '☀️' : '🌙';
+		if (elModeLabel) elModeLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
+	}
+
+	function applyMode(mode, opts = {}) {
+		const next = mode === 'dark' ? 'dark' : 'light';
+		document.documentElement.dataset.mode = next;
+		if (!opts.skipSave) {
+			localStorage.setItem(MODE_KEY, next);
+		}
+		updateModeToggle(next);
+		if (themes && lastThemeKey) {
+			applyTheme(lastThemeKey, next);
+		}
+	}
+
+	function setupModeListeners() {
+		const stored = getStoredMode();
+		const initial = stored || currentMode();
+		applyMode(initial, { skipSave: !stored });
+		if (elModeToggle) {
+			elModeToggle.addEventListener('click', () => {
+				const next = currentMode() === 'dark' ? 'light' : 'dark';
+				applyMode(next);
+				recompute();
+			});
+		}
+		if (typeof window.matchMedia === 'function') {
+			const mq = window.matchMedia('(prefers-color-scheme: dark)');
+			if (mq && typeof mq.addEventListener === 'function') {
+				mq.addEventListener('change', (e) => {
+					if (getStoredMode()) return;
+					applyMode(e.matches ? 'dark' : 'light', { skipSave: true });
+					recompute();
+				});
+			}
+		}
+	}
+
 	// Business-day count (inclusive; excludes Sundays and holidays)
 	function computeBusinessDays(fromYMD, toYMD) {
 		const fromMs = Date.UTC(fromYMD.y, fromYMD.m, fromYMD.d);
@@ -82,14 +169,21 @@
 	}
 
 	// Theming
-	function applyTheme(themeKey) {
+	function applyTheme(themeKey, mode) {
 		if (!themes) return;
+		lastThemeKey = themeKey;
 		const root = document.documentElement;
 		const base = themes.base || {};
 		const current = themes[themeKey] || {};
-		for (const [k, v] of Object.entries(base)) root.style.setProperty(k, v);
-		for (const [k, v] of Object.entries(current)) root.style.setProperty(k, v);
+		const palette = { ...base, ...current };
+		const overlay =
+			mode === 'dark'
+				? DARK_OVERRIDES[themeKey] || DARK_OVERRIDES.default || DARK_OVERRIDES.base
+				: null;
+		const finalPalette = overlay ? { ...palette, ...overlay } : palette;
+		for (const [k, v] of Object.entries(finalPalette)) root.style.setProperty(k, v);
 		document.body.dataset.theme = themeKey;
+		document.documentElement.dataset.mode = mode === 'dark' ? 'dark' : 'light';
 	}
 	function resolveThemeKey(today) {
 		const dstr = fmtYMD(today.y, today.m, today.d);
@@ -187,7 +281,7 @@
 		// Theme + status
 		const inferredKey = resolveThemeKey(today);
 		const themeKey = preview || inferredKey;
-		applyTheme(themeKey);
+		applyTheme(themeKey, currentMode());
 		const names = {
 			diwali: 'Diwali',
 			karnataka: 'Karnataka Rajyotsava',
@@ -238,6 +332,7 @@
 
 	// Boot
 	async function boot() {
+		setupModeListeners();
 		[config, themes] = await Promise.all([
 			loadJSON('../data/config.json', 'default-config'),
 			loadJSON('../data/themes.json', 'default-themes'),

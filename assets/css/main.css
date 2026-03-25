@@ -10,6 +10,35 @@
   /* mint */
   --accent-2: #ffd6e8;
   /* pink */
+  --card-bg: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.05);
+  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  --button-ink: #113333;
+  --pill-ink: #5a2a40;
+  --chip-bg: #ffe9f2;
+  --chip-ink: #7a1f3a;
+  --clear-bg: #fff7e6;
+  --clear-ink: #7a4b00;
+  --track-bg: rgba(0, 0, 0, 0.06);
+}
+
+:root[data-mode='dark'] {
+  --bg-1: #0f172a;
+  --bg-2: #1e293b;
+  --ink: #e2e8f0;
+  --muted: #cbd5e1;
+  --accent: #38bdf8;
+  --accent-2: #a78bfa;
+  --card-bg: #111827;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --button-ink: #0b1626;
+  --pill-ink: #0b1626;
+  --chip-bg: #1f2937;
+  --chip-ink: #e2e8f0;
+  --clear-bg: #1e293b;
+  --clear-ink: #e2e8f0;
+  --track-bg: rgba(255, 255, 255, 0.12);
 }
 
 * {
@@ -34,6 +63,14 @@ body {
   padding: 24px 16px 40px;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .header h1 {
   margin: 0;
   font-weight: 800;
@@ -45,13 +82,42 @@ body {
   margin-top: 6px;
 }
 
+.title-stack {
+  display: grid;
+  gap: 6px;
+}
+
+.mode-toggle {
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.mode-toggle:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+.mode-toggle:active {
+  transform: translateY(0);
+}
+
 .counter {
   margin: 28px 0 18px;
   padding: 24px;
-  background: white;
+  background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
 }
 
 .days {
@@ -111,16 +177,17 @@ body {
 .holiday-form input[type="text"] {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #fff;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--ink);
 }
 
 .holiday-form button {
   padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--card-border);
   background: var(--accent);
-  color: #113333;
+  color: var(--button-ink);
   font-weight: 700;
   cursor: pointer;
 }
@@ -142,9 +209,9 @@ body {
   gap: 10px;
   padding: 10px 12px;
   margin-bottom: 8px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--card-border);
 }
 
 .holiday-list .label {
@@ -154,18 +221,18 @@ body {
 .holiday-list button {
   padding: 6px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #ffe9f2;
-  color: #7a1f3a;
+  border: 1px solid var(--card-border);
+  background: var(--chip-bg);
+  color: var(--chip-ink);
   cursor: pointer;
 }
 
 .clear {
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #fff7e6;
-  color: #7a4b00;
+  border: 1px solid var(--card-border);
+  background: var(--clear-bg);
+  color: var(--clear-ink);
   cursor: pointer;
 }
 
@@ -186,10 +253,10 @@ body {
   align-items: center;
   gap: 12px;
   padding: 20px 24px;
-  background: white;
+  background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
   text-align: center;
 }
 
@@ -210,9 +277,9 @@ body {
 .quote-refresh {
   padding: 8px 18px;
   border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--card-border);
   background: var(--accent-2);
-  color: #5a2a40;
+  color: var(--pill-ink);
   font-weight: 700;
   font-size: 0.88rem;
   cursor: pointer;
@@ -227,10 +294,10 @@ body {
 .progress-section {
   margin-top: 24px;
   padding: 20px 24px;
-  background: white;
+  background: var(--card-bg);
   border-radius: 16px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
 }
 
 .progress-header {
@@ -259,7 +326,7 @@ body {
 .progress-track {
   height: 14px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--track-bg);
   overflow: hidden;
 }
 
