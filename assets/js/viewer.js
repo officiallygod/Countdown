@@ -24,7 +24,8 @@
 	let holidaySet = new Set();
 	let holidayMap = new Map(); // date -> { name, theme }
 	let quotesByDate = {};
-	let lastThemeKey = null; // remember the currently applied theme key
+	let lastThemeKey = null; // Remember the currently applied theme key
+	let lastEffectsThemeKey = null;
 
 	// Quote cycling state
 	let allQuotes = [];
@@ -41,7 +42,7 @@
 			'--accent-1': '#38bdf8',
 			'--accent-2': '#a78bfa',
 		},
-		// Sunday override is used when resolveThemeKey detects weekend pause
+		// Sunday override is used when resolveThemeKey maps the day-of-week to Sunday
 		sunday: { '--bg-1': '#1d1120', '--bg-2': '#271525' },
 		diwali: { '--bg-1': '#1c1608', '--bg-2': '#2a1d10' },
 		karnataka: { '--bg-1': '#1f1610', '--bg-2': '#2a1412' },
@@ -379,8 +380,8 @@
 	// Effects wiring (use global Effects from assets/js/effects.js)
 	function updateEffects(themeKey) {
 		if (!elEffects || !window.Effects) return;
-		if (lastThemeKey === themeKey) return;
-		lastThemeKey = themeKey;
+		if (lastEffectsThemeKey === themeKey) return;
+		lastEffectsThemeKey = themeKey;
 		elEffects.innerHTML = '';
 		if (elLights) elLights.innerHTML = '';
 		if (themeKey === 'christmas') Effects.buildSnow(elEffects, 60);
