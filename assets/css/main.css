@@ -33,7 +33,7 @@
   --card-border: rgba(255, 255, 255, 0.08);
   --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   --button-ink: #0b1626;
-  --pill-ink: #0b1626;
+  --pill-ink: #0b1626; /* separate for future tuning even if same as button */
   --chip-bg: #1f2937;
   --chip-ink: #e2e8f0;
   --clear-bg: #1e293b;

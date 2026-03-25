@@ -24,7 +24,7 @@
 	let holidaySet = new Set();
 	let holidayMap = new Map(); // date -> { name, theme }
 	let quotesByDate = {};
-	let lastThemeKey = null; // Remember the currently applied theme key
+	let lastAppliedThemeKey = null; // Remember the currently applied palette theme key
 	let lastEffectsThemeKey = null;
 
 	// Quote cycling state
@@ -118,8 +118,8 @@
 			localStorage.setItem(MODE_KEY, next);
 		}
 		updateModeToggle(next);
-		if (themes && lastThemeKey) {
-			applyTheme(lastThemeKey, next);
+		if (themes && lastAppliedThemeKey) {
+			applyTheme(lastAppliedThemeKey, next);
 		}
 	}
 
@@ -165,15 +165,16 @@
 	// Theming
 	function applyTheme(themeKey, mode) {
 		if (!themes) return;
-		lastThemeKey = themeKey;
 		const root = document.documentElement;
+		const resolvedKey = themes[themeKey] ? themeKey : 'base';
 		const base = themes.base || {};
-		const current = themes[themeKey] || {};
+		const current = themes[resolvedKey] || {};
 		const palette = { ...base, ...current };
-		const overlay = mode === 'dark' ? DARK_OVERRIDES[themeKey] || DARK_OVERRIDES.base : null;
+		const overlay = mode === 'dark' ? DARK_OVERRIDES[resolvedKey] || DARK_OVERRIDES.base : null;
 		const finalPalette = overlay ? { ...palette, ...overlay } : palette;
 		for (const [k, v] of Object.entries(finalPalette)) root.style.setProperty(k, v);
-		document.body.dataset.theme = themeKey;
+		lastAppliedThemeKey = resolvedKey;
+		document.body.dataset.theme = resolvedKey;
 		document.documentElement.dataset.mode = mode === 'dark' ? 'dark' : 'light';
 	}
 	function resolveThemeKey(today) {
