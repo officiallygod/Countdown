@@ -24,7 +24,7 @@
 	let holidaySet = new Set();
 	let holidayMap = new Map(); // date -> { name, theme }
 	let quotesByDate = {};
-	let lastThemeKey = null;
+	let lastThemeKey = null; // remember the currently applied theme key
 
 	// Quote cycling state
 	let allQuotes = [];
@@ -41,6 +41,7 @@
 			'--accent-1': '#38bdf8',
 			'--accent-2': '#a78bfa',
 		},
+		// Sunday override is used when resolveThemeKey detects weekend pause
 		sunday: { '--bg-1': '#1d1120', '--bg-2': '#271525' },
 		diwali: { '--bg-1': '#1c1608', '--bg-2': '#2a1d10' },
 		karnataka: { '--bg-1': '#1f1610', '--bg-2': '#2a1412' },
