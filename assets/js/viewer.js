@@ -31,14 +31,6 @@
 	let currentQuoteIdx = -1;
 
 	const DARK_OVERRIDES = {
-		default: {
-			'--bg-1': '#0f172a',
-			'--bg-2': '#111827',
-			'--ink': '#e2e8f0',
-			'--muted': '#cbd5e1',
-			'--panel-bg': 'rgba(15, 23, 42, 0.78)',
-			'--panel-border': 'rgba(255, 255, 255, 0.12)',
-		},
 		base: {
 			'--bg-1': '#0f172a',
 			'--bg-2': '#111827',
@@ -176,10 +168,7 @@
 		const base = themes.base || {};
 		const current = themes[themeKey] || {};
 		const palette = { ...base, ...current };
-		const overlay =
-			mode === 'dark'
-				? DARK_OVERRIDES[themeKey] || DARK_OVERRIDES.default || DARK_OVERRIDES.base
-				: null;
+		const overlay = mode === 'dark' ? DARK_OVERRIDES[themeKey] || DARK_OVERRIDES.base : null;
 		const finalPalette = overlay ? { ...palette, ...overlay } : palette;
 		for (const [k, v] of Object.entries(finalPalette)) root.style.setProperty(k, v);
 		document.body.dataset.theme = themeKey;
